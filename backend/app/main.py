@@ -2,11 +2,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.db.database import init_db
+from app.models import models
+from app.routers import passages, analyze
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
     yield
+
 
 app = FastAPI(
     title="Pronunciation Coach API",
@@ -22,10 +26,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(passages.router, prefix="/api")
+app.include_router(analyze.router, prefix="/api")
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
-
-@app.get("/")
-async def root():
-    return {"message": "API is running"}
